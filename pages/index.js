@@ -1,42 +1,60 @@
-import Head from "next/head";
-import { Button, Badge, ListGroup } from "react-bootstrap";
+import React from "react";
+import { Button, ListGroup } from "react-bootstrap";
 import { GraphQLClient } from "graphql-request";
 
+let roster = [
+  { name: "ada lovelace", isInAttendance: false },
+  { name: "grace hopper", isInAttendance: false },
+  { name: "margaret hamilton", isInAttendance: false },
+];
 export default function Home() {
-  let roster = ["ada lovelace", "grace hopper", "margaret hamilton"];
-  let currentRoster = [];
+  const [state, setState] = React.useState(roster);
   return (
     <div>
       <h1>In Attendance</h1>
-      <List students={currentRoster} />
+      <List students={state} changeStatus={setState} isInAttendanceRoster />
       <h1>Not In Attendance</h1>
-      <List students={roster} />
+      <List students={state} changeStatus={setState} />
     </div>
   );
 }
 
-function List({ students }) {
+function List({ students, changeStatus, isInAttendanceRoster = false }) {
+  function onClickHandler(changedStudent) {
+    const index = students.indexOf(changedStudent);
+    students[index].isInAttendance = !changedStudent.isInAttendance;
+    console.dir(students);
+    return students;
+  }
   return (
     <ListGroup>
-      {students.map((student) => (
-        <ListGroup.Item>{student}</ListGroup.Item>
-      ))}
+      {students.map((student) => {
+        return student.isInAttendance == isInAttendanceRoster ? (
+          <ListGroup.Item>
+            <Button onClick={() => changeStatus([...onClickHandler(student)])}>
+              Change Status
+            </Button>
+            {student.name}
+          </ListGroup.Item>
+        ) : null;
+      })}
     </ListGroup>
   );
 }
+
 // export async function getServerSideProps() {
-//   const graphCMSClient = new GraphQLClient(
+//   const graphcmsClient = new GraphQLClient(
 //     "https://api-us-east-1.graphcms.com/v2/ckbqrbfzi008801z34ilieehq/master"
 //   );
 
 //   const query = `{
 //     students {
 //       name
-//       isInClass
+//       isInAttendance
 //     }
 //   }`;
 
-//   const result = await graphCMSClient.request(query);
+//   const result = await graphcmsClient.request(query);
 //   const students = result.students;
 //   return {
 //     props: {
